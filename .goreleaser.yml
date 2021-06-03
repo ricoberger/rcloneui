@@ -1,0 +1,20 @@
+project_name: rcloneui
+builds:
+  - main: ./cmd/rcloneui
+    id: rcloneui
+    binary: rcloneui
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X github.com/ricoberger/rcloneui/pkg/version.Version={{.Version}} -X github.com/ricoberger/rcloneui/pkg/version.Revision={{.Commit}} -X github.com/ricoberger/rcloneui/pkg/version.Branch={{.Env.GITHUB_REF}} -X github.com/ricoberger/rcloneui/pkg/version.BuildUser=goreleaser -X github.com/ricoberger/rcloneui/pkg/version.BuildDate={{.Date}}
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+checksum:
+  name_template: 'checksums.txt'
+changelog:
+  sort: asc
