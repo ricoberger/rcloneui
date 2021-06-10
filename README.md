@@ -2,6 +2,8 @@
 
 rcloneui is a small terminal ui for [rclone](https://rclone.org) to view, copy and delete files from all remotes configured in your `rclone.conf` file.
 
+![Screenshot](./assets/screenshot.png)
+
 ## Usage
 
 You can download rcloneui for your environment from the [releases](https://github.com/ricoberger/rcloneui/releases) page. Then extract the archive and run the `rcloneui` binary. To install the binary into your path you can use the following command:
