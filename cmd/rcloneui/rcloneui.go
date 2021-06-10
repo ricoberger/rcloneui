@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/ricoberger/rcloneui/pkg/version"
@@ -59,8 +60,8 @@ func main() {
 	app := tview.NewApplication()
 
 	status := view.NewStatus(app)
-	view1 := view.NewView(app, status, remotes, userDir)
-	view2 := view.NewView(app, status, remotes, userDir)
+	view1 := view.NewView(app, status, remotes, strings.Split(userDir, "/"))
+	view2 := view.NewView(app, status, remotes, strings.Split(userDir, "/"))
 
 	view1.SetView(view2)
 	view2.SetView(view1)
