@@ -17,6 +17,7 @@ sudo install -m 755 rcloneui /usr/local/bin/rcloneui
 The following keys can be used for the navigation within the table and to switch between the two views.
 
 | Key | Navigation |
+| --- | ---------- |
 | `j` or `down arrow` | Move down by one row .|
 | `k` or `up arrow` | Move up by one row. |
 | `g` or `home` | Move to the top. |
@@ -30,6 +31,7 @@ The following keys can be used for the navigation within the table and to switch
 The following keys can be used to copy, paste or delete a file/folder.
 
 | Key | Action |
+| --- | ------ |
 | `c` | Copy file. |
 | `p` | Paste file. |
 | `dd` | Delete file. |
