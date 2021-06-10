@@ -5,17 +5,15 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
-	"github.com/ricoberger/rcloneui/pkg/prompt"
+	"github.com/gdamore/tcell/v2"
 	"github.com/ricoberger/rcloneui/pkg/version"
+	"github.com/ricoberger/rcloneui/pkg/view"
 
-	"github.com/manifoldco/promptui"
 	_ "github.com/rclone/rclone/backend/all"
-	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/config"
 	"github.com/rclone/rclone/fs/config/configfile"
-	"github.com/rclone/rclone/fs/operations"
+	"github.com/rivo/tview"
 	flag "github.com/spf13/pflag"
 )
 
@@ -48,6 +46,7 @@ func main() {
 	// the rcloneui.
 	configfile.LoadConfig(context.Background())
 	remotes := config.Data.GetSectionList()
+	remotes = append([]string{view.Local}, remotes...)
 
 	// Get the users current directory, which is used as destination for downloading files.
 	userDir, err := os.Getwd()
@@ -55,95 +54,23 @@ func main() {
 		log.Fatalf("Could not get current directory: %#v", err)
 	}
 
-	for {
-		remote, err := prompt.SelectRemote(remotes)
-		if err != nil {
-			if err == promptui.ErrInterrupt {
-				return
-			}
-			log.Fatalf("Could not show select remote view: %#v", err)
-		}
+	// Initialize the status bar, the two views and the grid, which then are rendered via tview. After the views are
+	// initialized we have to pass the other view to a view, so that we can switch the focus via the tab key.
+	app := tview.NewApplication()
 
-		var path []string
+	status := view.NewStatus(app)
+	view1 := view.NewView(app, status, remotes, userDir)
+	view2 := view.NewView(app, status, remotes, userDir)
 
-		for {
-			f, err := fs.NewFs(context.Background(), fmt.Sprintf("%s:%s", remote, strings.Join(path, "/")))
-			if err != nil {
-				if err == fs.ErrorIsFile {
-					action, err := prompt.SelectFileAction(remote, path)
-					if err != nil {
-						if err == promptui.ErrInterrupt {
-							return
-						}
-						log.Fatalf("Could not show file action view: %#v", err)
-					}
+	view1.SetView(view2)
+	view2.SetView(view1)
 
-					if action == "Cancel" {
-						path = path[:len(path)-1]
-					} else if action == "Copy" {
-						fdst, err := fs.NewFs(context.Background(), userDir)
-						if err != nil {
-							log.Fatalf("Could not create new fsrc object: %#v", err)
-						}
+	grid := tview.NewGrid().SetRows(0, 1).SetColumns(0, 0).SetBorders(true)
+	grid.SetBordersColor(tcell.ColorBlack)
+	grid.AddItem(view1, 0, 0, 1, 1, 0, 0, true).AddItem(view2, 0, 1, 1, 1, 0, 0, false)
+	grid.AddItem(status, 1, 0, 1, 2, 0, 0, false)
 
-						fsrc, err := fs.NewFs(context.Background(), fmt.Sprintf("%s:%s", remote, strings.Join(path[:len(path)-1], "/")))
-						if err != nil {
-							log.Fatalf("Could not create new fsrc object: %#v", err)
-						}
-
-						filename := path[len(path)-1]
-						err = operations.CopyFile(context.Background(), fdst, fsrc, filename, filename)
-						if err != nil {
-							log.Fatalf("Could not copy file: %#v", err)
-						}
-
-						path = path[:len(path)-1]
-					} else if action == "Delete" {
-						fdst, err := fs.NewFs(context.Background(), fmt.Sprintf("%s:%s", remote, strings.Join(path[:len(path)-1], "/")))
-						if err != nil {
-							log.Fatalf("Could not create new fsrc object: %#v", err)
-						}
-
-						dst, err := fdst.NewObject(context.Background(), path[len(path)-1])
-						if err != nil {
-							log.Fatalf("Could not get file for deletion: %#v", err)
-						}
-
-						err = operations.DeleteFile(context.Background(), dst)
-						if err != nil {
-							log.Fatalf("Could not delete file: %#v", err)
-						}
-
-						path = path[:len(path)-1]
-					}
-				} else {
-					log.Fatalf("Could not create new fs object for \"%s:%s\": %#v", remote, path, err)
-				}
-			}
-
-			entries, err := f.List(context.Background(), "")
-			if err != nil {
-				log.Fatalf("Could not get entries for ")
-			}
-
-			convertedEntries := prompt.ConvertEntries(entries)
-			entry, err := prompt.SelectEntry(remote, path, convertedEntries)
-			if err != nil {
-				if err == promptui.ErrInterrupt {
-					return
-				}
-				log.Fatalf("Could not show select entry view: %#v", err)
-			}
-
-			if entry == ".." {
-				if len(path) == 0 {
-					break
-				} else {
-					path = path[:len(path)-1]
-				}
-			} else {
-				path = append(path, entry)
-			}
-		}
+	if err := app.SetRoot(grid, true).SetFocus(grid).Run(); err != nil {
+		log.Fatalf("Could not render view: %#v", err)
 	}
 }
