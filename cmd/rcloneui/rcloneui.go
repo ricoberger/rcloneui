@@ -19,12 +19,20 @@ import (
 )
 
 var (
+	maxAge      string
+	maxSize     string
+	minAge      string
+	minSize     string
 	showVersion bool
 )
 
 // init is used to define all flags for rcloneui. For example we define the --version flag here, which can be used to
 // print the version information of rcloneui.
 func init() {
+	flag.StringVar(&maxAge, "max-age", "off", "Only transfer files younger than this in s or suffix ms|s|m|h|d|w|M|y.")
+	flag.StringVar(&maxSize, "max-size", "off", "Only transfer files smaller than this in k or suffix b|k|M|G.")
+	flag.StringVar(&minAge, "min-age", "off", "Only transfer files older than this in s or suffix ms|s|m|h|d|w|M|y.")
+	flag.StringVar(&minSize, "min-size", "off", "Only transfer files bigger than this in k or suffix b|k|M|G.")
 	flag.BoolVar(&showVersion, "version", false, "Print version information.")
 }
 
@@ -59,9 +67,14 @@ func main() {
 	// initialized we have to pass the other view to a view, so that we can switch the focus via the tab key.
 	app := tview.NewApplication()
 
+	filter, err := view.CreateFilter(minAge, maxAge, minSize, maxSize)
+	if err != nil {
+		log.Fatalf("Could not create filter: %#v", err)
+	}
+
 	status := view.NewStatus(app)
-	view1 := view.NewView(app, status, remotes, strings.Split(userDir, "/"))
-	view2 := view.NewView(app, status, remotes, strings.Split(userDir, "/"))
+	view1 := view.NewView(app, status, remotes, strings.Split(userDir, "/"), filter)
+	view2 := view.NewView(app, status, remotes, strings.Split(userDir, "/"), filter)
 
 	view1.SetView(view2)
 	view2.SetView(view1)

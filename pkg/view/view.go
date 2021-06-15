@@ -8,8 +8,10 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rclone/rclone/fs"
+	"github.com/rclone/rclone/fs/filter"
 	"github.com/rclone/rclone/fs/operations"
 	"github.com/rclone/rclone/fs/sync"
+	"github.com/rclone/rclone/fs/walk"
 	"github.com/rivo/tview"
 )
 
@@ -24,6 +26,7 @@ type View struct {
 	remote        string
 	remotePath    []string
 	remoteEntries fs.DirEntries
+	remoteFilter  *filter.Filter
 
 	status    *Status
 	otherView *View
@@ -70,7 +73,10 @@ func (v *View) renderEntries(app *tview.Application) {
 		}
 	}
 
-	v.remoteEntries, err = f.List(context.Background(), "")
+	err = walk.ListR(filter.ReplaceConfig(context.Background(), v.remoteFilter), f, "", false, 1, walk.ListAll, func(entries fs.DirEntries) error {
+		v.remoteEntries = entries
+		return nil
+	})
 	if err != nil {
 		app.Stop()
 		log.Fatalf("Could not get entries for \"%s\": %#v", fsPath(v.remote, v.remotePath), err)
@@ -95,13 +101,14 @@ func (v *View) SetView(otherView *View) {
 
 // NewView returns a new view. To create a new view we have to pass the app so that we can stop the application in case
 // of an error. It also requires the status compnent, the remotes and the current directory of the user.
-func NewView(app *tview.Application, status *Status, remotes, localPath []string) *View {
+func NewView(app *tview.Application, status *Status, remotes, localPath []string, remoteFilter *filter.Filter) *View {
 	v := &View{
 		tview.NewTable().SetFixed(1, 0).SetSelectable(true, false).SetEvaluateAllRows(true).SetBorders(false),
 		remotes,
 		"",
 		nil,
 		nil,
+		remoteFilter,
 		status,
 		nil,
 	}
