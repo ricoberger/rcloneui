@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -53,8 +52,8 @@ func main() {
 
 	// Load the rclone configuration file and get a list of all sections. The sections are always used as entrypoint for
 	// the rcloneui.
-	configfile.LoadConfig(context.Background())
-	remotes := config.Data.GetSectionList()
+	configfile.Install()
+	remotes := config.LoadedData().GetSectionList()
 	remotes = append([]string{view.Local}, remotes...)
 
 	// Get the users current directory, which is used as destination for downloading files.
