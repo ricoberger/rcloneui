@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/gdamore/tcell/v2 v2.7.0
-	github.com/rclone/rclone v1.65.1
+	github.com/rclone/rclone v1.65.2
 	github.com/rivo/tview v0.0.0-20240116070845-bf8f1c43e46c
 	github.com/spf13/pflag v1.0.5
 )
