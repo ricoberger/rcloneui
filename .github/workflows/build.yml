@@ -30,13 +30,13 @@ jobs:
         if: "!startsWith(github.ref, 'refs/tags/')"
         with:
           version: latest
-          args: build --snapshot --rm-dist --debug
+          args: build --snapshot --clean --verbose
 
       - name: Build and Release
         uses: goreleaser/goreleaser-action@v6
         if: startsWith(github.ref, 'refs/tags/')
         with:
           version: latest
-          args: release --rm-dist
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
