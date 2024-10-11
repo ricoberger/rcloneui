@@ -46,7 +46,7 @@ func CreateFilter(minAge, maxAge, minSize, maxSize string) (*filter.Filter, erro
 		return nil, err
 	}
 
-	opts := filter.Opt{
+	opts := filter.Options{
 		MinAge:  minAgeParsed,
 		MaxAge:  maxAgeParsed,
 		MinSize: minSizeParsed,
