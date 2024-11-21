@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/gdamore/tcell/v2 v2.7.4
-	github.com/rclone/rclone v1.68.1
+	github.com/rclone/rclone v1.68.2
 	github.com/rivo/tview v0.0.0-20240116070845-bf8f1c43e46c
 	github.com/spf13/pflag v1.0.5
 )
@@ -84,7 +84,7 @@ require (
 	github.com/go-resty/resty/v2 v2.11.0 // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
+	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
